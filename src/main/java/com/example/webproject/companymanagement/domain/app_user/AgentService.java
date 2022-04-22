@@ -33,7 +33,7 @@ public class AgentService {
     private final PasswordEncoder passwordEncoder;
 
     public List<User> getUsers() {
-        var list = userRepo.findAll();
+        List<User> list = userRepo.findAll();
         list.forEach(user -> user.setPassword(""));
         return list;
     }
@@ -58,7 +58,7 @@ public class AgentService {
 
     public User getCurrentUser() {
        // System.out.println(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-        var user = User.thisAgent();
+        User user = User.thisAgent();
         log.info("Current user {}", user);
         Optional<User> optional = userRepo.findByUsername(user.getUsername());
         optional.orElseThrow(EntityNotFoundException::new);
@@ -80,7 +80,7 @@ public class AgentService {
     @Transactional
     public User updateUser(String username, @NotNull User user) {
         Optional<User> optional = userRepo.findByUsername(username);
-        var role = roleRepo.findById(user.getRole().getId());
+        Optional<Role> role = roleRepo.findById(user.getRole().getId());
         optional.orElseThrow();
         role.orElseThrow();
         var u = optional.get();
