@@ -27,7 +27,7 @@ public class TaskService {
 
     public Task addTask(Task task) {
          Task t = repository.save(task);
-         var situation = Situation.builder().task(t).message("").state(State.TODO).build();
+        Situation situation = Situation.builder().task(t).message("").state(State.TODO).build();
          situationRepository.save(situation);
          return t;
     }
@@ -35,10 +35,10 @@ public class TaskService {
     @Transactional
     public Task updateTask(Long id,Task task) throws  EntityNotFoundException{
         Optional<Task> optional = repository.findById(id);
-        optional.orElseThrow();
-        var user = userRepo.findByUsername(task.getAssignedTo().getUsername());
-        user.orElseThrow();
-        var t = optional.get();
+        optional.orElseThrow(EntityNotFoundException::new);
+        Optional<User> user = userRepo.findByUsername(task.getAssignedTo().getUsername());
+        user.orElseThrow(EntityNotFoundException::new);
+        Task t = optional.get();
         t.setTitle(task.getTitle());
         t.setDescription(task.getDescription());
         t.setAssignedTo(user.get());
@@ -53,12 +53,12 @@ public class TaskService {
 
     public List<Task> getEmployeeTasks(String username){
         Optional<User> user = userRepo.findByUsername(username);
-        user.orElseThrow();
+        user.orElseThrow(EntityNotFoundException::new);
         return repository.findByUserId(user.get().getId());
     }
 
     public List<Task> getCurrentUserTasks(){
-        var user = User.thisAgent();
+        User user = User.thisAgent();
         if (user.getRole().getName().equals("ROLE_EMPLOYEE")){
             return repository.findByUserId(user.getId());
         }else if(user.getRole().getName().equals("ROLE_ADMIN")){
@@ -74,7 +74,7 @@ public class TaskService {
 
     public List<Task> getAdminTasks(String username){
         Optional<User> user = userRepo.findByUsername(username);
-        user.orElseThrow();
+        user.orElseThrow(EntityNotFoundException::new);
         return repository.findByCreator(user.get().getId());
     }
     public void deleteTask(Long id) throws EntityNotFoundException {
@@ -85,7 +85,7 @@ public class TaskService {
 
     public Task getTask(Long id){
         Optional<Task> byId = repository.findById(id);
-        byId.orElseThrow();
+        byId.orElseThrow(EntityNotFoundException::new);
         return byId.get();
     }
 

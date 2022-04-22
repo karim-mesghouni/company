@@ -81,9 +81,8 @@ public class AgentService {
     public User updateUser(String username, @NotNull User user) {
         Optional<User> optional = userRepo.findByUsername(username);
         Optional<Role> role = roleRepo.findById(user.getRole().getId());
-        optional.orElseThrow();
-        role.orElseThrow();
-        var u = optional.get();
+
+        User u = optional.get();
         u.setPassword(passwordEncoder.encode(user.getPassword()));
         u.setEmail(user.getEmail());
         u.setUsername(user.getUsername());
@@ -109,14 +108,13 @@ public class AgentService {
     }
 
 
+    @Transactional
     public void addRoleToUser(String username, String roleName) {
-        var user = userRepo.findByUsername(username);
-        var role = roleRepo.findByName(roleName);
-        user.ifPresentOrElse((u) -> {
-            u.setRole(role);
-        }, () -> {
-            throw new UsernameNotFoundException("Can not find user by the given username");
-        });
+        Optional<User> user = userRepo.findByUsername(username);
+        Role role = roleRepo.findByName(roleName);
+
+            user.get().setRole(role);
+
     }
 
 //   public void addCertificationToUser(String username, Long certificationId) {

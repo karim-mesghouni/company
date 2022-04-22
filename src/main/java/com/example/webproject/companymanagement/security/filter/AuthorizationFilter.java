@@ -9,6 +9,7 @@ import com.example.webproject.companymanagement.domain.app_user.models.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -29,7 +30,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain filterChain) throws ServletException, IOException {
-        var auth = getAuthentication(request,response);
+        UsernamePasswordAuthenticationToken auth = getAuthentication(request,response);
         if (auth != null)
             SecurityContextHolder.getContext().setAuthentication(auth);
         filterChain.doFilter(request,response);
@@ -52,9 +53,13 @@ public class AuthorizationFilter extends OncePerRequestFilter {
                          .id(id)
                          .role(Role.builder().name(role).build())
                          .build();
+
+
+                 List<GrantedAuthority> authorities = new ArrayList<>();
+                 authorities.add( new SimpleGrantedAuthority(role));
                  return new UsernamePasswordAuthenticationToken(user,
-                         null,
-                         List.of(new SimpleGrantedAuthority(role)));
+                         null,authorities
+                         );
              }catch (Exception e){
                  response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "invalid token");
              }
